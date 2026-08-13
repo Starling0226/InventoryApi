@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using InventoryApi.Modules.Categories.Entities;
+
 namespace InventoryApi.Modules.Products.Entities
 {
     public class Product
@@ -13,5 +15,8 @@ namespace InventoryApi.Modules.Products.Entities
         public string Description { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public int Stock { get; set; }
+
+        public int CategoryId { get; set; }
+        public Category? Category { get; set; }
     }
 }

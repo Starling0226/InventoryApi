@@ -1,5 +1,6 @@
 using InventoryApi.Data;
 using InventoryApi.Modules.Products.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryApi.Modules.Products.Repositories
 {
@@ -14,12 +15,12 @@ namespace InventoryApi.Modules.Products.Repositories
 
         public IEnumerable<Product> GetAll()
         {
-            return _context.Products.ToList();
+            return _context.Products.Include(p => p.Category).ToList();;
         }
 
         public Product? GetById(int id)
         {
-            return _context.Products.FirstOrDefault(p => p.Id == id);
+           return _context.Products.Include(p => p.Category).FirstOrDefault(p => p.Id == id);
         }
 
         public Product Create(Product product)

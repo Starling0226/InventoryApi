@@ -18,5 +18,9 @@ namespace InventoryApi.Modules.Products.Dtos
         [Required(ErrorMessage = "El stock es obligatorio.")]
         [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]
         public int Stock { get; set; }
+
+
+        [Required(ErrorMessage = "El ID de la categoría es obligatorio.")]
+        public int CategoryId { get; set; }
     }
 }
