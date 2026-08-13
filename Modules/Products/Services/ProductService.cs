@@ -1,40 +1,45 @@
 using InventoryApi.Modules.Products.Dtos;
 using InventoryApi.Modules.Products.Entities;
+using InventoryApi.Modules.Products.Repositories;
 
 namespace InventoryApi.Modules.Products.Services
 {
     public class ProductService
     {
-        private static readonly List<Product> _products = new();
+        private readonly IProductRepository _repository;
 
-        public List<Product> GetAll()
+        public ProductService(IProductRepository repository)
         {
-            return _products;
+            _repository = repository;
         }
 
-        public Product? GetById(Guid id)
+        public IEnumerable<Product> GetAll()
         {
-            return _products.FirstOrDefault(p => p.Id == id);
+            return _repository.GetAll();
+        }
+
+        public Product? GetById(int id)
+        {
+            return _repository.GetById(id);
         }
 
         public Product Create(CreateProductDto dto)
         {
             var newProduct = new Product
             {
-                Id = Guid.NewGuid(),
+                Uuid = Guid.NewGuid(),
                 Name = dto.Name,
                 Description = dto.Description,
                 Price = dto.Price,
                 Stock = dto.Stock
             };
 
-            _products.Add(newProduct);
-            return newProduct;
+            return _repository.Create(newProduct);
         }
 
-        public Product? PartialUpdate(Guid id, PartialUpdateProductDto dto)
+        public Product? PartialUpdate(int id, PartialUpdateProductDto dto)
         {
-            var product = GetById(id);
+            var product = _repository.GetById(id);
             if (product == null) return null;
 
             if (dto.Name is not null) product.Name = dto.Name;
@@ -42,16 +47,12 @@ namespace InventoryApi.Modules.Products.Services
             if (dto.Price.HasValue) product.Price = dto.Price.Value;
             if (dto.Stock.HasValue) product.Stock = dto.Stock.Value;
 
-            return product;
+            return _repository.Update(product);
         }
 
-        public bool Delete(Guid id)
+        public bool Delete(int id)
         {
-            var product = GetById(id);
-            if (product == null) return false;
-
-            _products.Remove(product);
-            return true;
+            return _repository.Delete(id);
         }
     }
 }

@@ -18,62 +18,44 @@ namespace InventoryApi.Modules.Products.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var products = _productService.GetAll();
-            return Ok(products); // 200 OK
+            return Ok(_productService.GetAll());
         }
 
-        [HttpGet("{id:guid}")]
-        public IActionResult GetById(Guid id)
+        [HttpGet("{id:int}")] 
+        public IActionResult GetById(int id)
         {
             var product = _productService.GetById(id);
-            if (product == null)
-            {
-                return NotFound(new { Message = "Producto no encontrado." }); // 404 Not Found
-            }
-            return Ok(product); // 200 OK
+            if (product == null) return NotFound(new { Message = "Producto no encontrado." });
+            return Ok(product);
         }
 
         [HttpPost]
         public IActionResult Create([FromBody] CreateProductDto dto)
         {
-            // ModelState verifica automáticamente los Data Annotations de nuestros DTOs
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState); // 400 Bad Request
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var newProduct = _productService.Create(dto);
-            // 201 Created y retorna la ruta para consultar el nuevo recurso
             return CreatedAtAction(nameof(GetById), new { id = newProduct.Id }, newProduct); 
         }
 
-        [HttpPatch("{id:guid}")]
-        public IActionResult PartialUpdate(Guid id, [FromBody] PartialUpdateProductDto dto)
+        [HttpPatch("{id:int}")] 
+        public IActionResult PartialUpdate(int id, [FromBody] PartialUpdateProductDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState); // 400 Bad Request
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var updatedProduct = _productService.PartialUpdate(id, dto);
-            if (updatedProduct == null)
-            {
-                return NotFound(new { Message = "Producto no encontrado para actualizar." }); // 404 Not Found
-            }
+            if (updatedProduct == null) return NotFound(new { Message = "Producto no encontrado." });
 
-            return Ok(updatedProduct); // 200 OK
+            return Ok(updatedProduct);
         }
 
-        [HttpDelete("{id:guid}")]
-        public IActionResult Delete(Guid id)
+        [HttpDelete("{id:int}")] 
+        public IActionResult Delete(int id)
         {
             var isDeleted = _productService.Delete(id);
-            if (!isDeleted)
-            {
-                return NotFound(new { Message = "Producto no encontrado para eliminar." }); // 404 Not Found
-            }
+            if (!isDeleted) return NotFound(new { Message = "Producto no encontrado." });
 
-            return Ok(new { Message = "Producto eliminado exitosamente." }); // 200 OK
+            return Ok(new { Message = "Producto eliminado exitosamente." });
         }
     }
 }

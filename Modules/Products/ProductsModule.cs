@@ -1,3 +1,4 @@
+using InventoryApi.Modules.Products.Repositories;
 using InventoryApi.Modules.Products.Services;
 
 namespace InventoryApi.Modules.Products
@@ -6,8 +7,10 @@ namespace InventoryApi.Modules.Products
     {
         public static IServiceCollection AddProductsModule(this IServiceCollection services)
         {
-            // Registramos el servicio para que el Controller pueda inyectarlo
+            services.AddScoped<IProductRepository, ProductRepository>();
+            
             services.AddScoped<ProductService>();
+            
             return services;
         }
     }
