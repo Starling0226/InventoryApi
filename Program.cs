@@ -1,8 +1,8 @@
 using InventoryApi.Data;
 using InventoryApi.Modules.Products;
-
 using InventoryApi.Modules.Categories; 
 using Microsoft.EntityFrameworkCore;
+using InventoryApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +18,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
