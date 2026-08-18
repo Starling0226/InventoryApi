@@ -1,6 +1,7 @@
 using InventoryApi.Modules.Products.Dtos;
 using InventoryApi.Modules.Products.Entities;
 using InventoryApi.Modules.Products.Repositories;
+using InventoryApi.Exceptions; 
 
 namespace InventoryApi.Modules.Products.Services
 {
@@ -19,14 +20,34 @@ namespace InventoryApi.Modules.Products.Services
             return products.Select(MapToResponseDto);
         }
 
-        public ProductResponseDto? GetById(int id)
+        public ProductResponseDto GetById(int id)
         {
             var product = _repository.GetById(id);
-            return product == null ? null : MapToResponseDto(product);
+            
+            if (product == null) 
+            {
+                throw new NotFoundException($"El producto con el ID {id} no fue encontrado.");
+            }
+            
+            return MapToResponseDto(product);
         }
 
         public ProductResponseDto Create(CreateProductDto dto)
         {
+            // Validaciones de negocio (Lanzan error 400)
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                throw new BadRequestException("El nombre del producto es obligatorio.");
+            }
+            if (dto.Price <= 0)
+            {
+                throw new BadRequestException("El precio del producto debe ser mayor a cero.");
+            }
+            if (dto.Stock < 0)
+            {
+                throw new BadRequestException("El stock no puede ser negativo.");
+            }
+
             var newProduct = new Product
             {
                 Uuid = Guid.NewGuid(),
@@ -43,10 +64,27 @@ namespace InventoryApi.Modules.Products.Services
             return MapToResponseDto(productWithCategory!);
         }
 
-        public ProductResponseDto? PartialUpdate(int id, PartialUpdateProductDto dto)
+        public ProductResponseDto PartialUpdate(int id, PartialUpdateProductDto dto)
         {
             var product = _repository.GetById(id);
-            if (product == null) return null;
+            
+            if (product == null) 
+            {
+                throw new NotFoundException($"El producto con el ID {id} no fue encontrado.");
+            }
+
+            if (dto.Name is not null && string.IsNullOrWhiteSpace(dto.Name))
+            {
+                throw new BadRequestException("El nombre del producto no puede quedar vacío.");
+            }
+            if (dto.Price.HasValue && dto.Price.Value <= 0)
+            {
+                throw new BadRequestException("El precio del producto debe ser mayor a cero.");
+            }
+            if (dto.Stock.HasValue && dto.Stock.Value < 0)
+            {
+                throw new BadRequestException("El stock no puede ser negativo.");
+            }
 
             if (dto.Name is not null) product.Name = dto.Name;
             if (dto.Description is not null) product.Description = dto.Description;
@@ -60,12 +98,17 @@ namespace InventoryApi.Modules.Products.Services
             return MapToResponseDto(productWithCategory!);
         }
 
-        public bool Delete(int id)
+        public void Delete(int id)
         {
-            return _repository.Delete(id);
+            var product = _repository.GetById(id);
+            if (product == null) 
+            {
+                throw new NotFoundException($"El producto con el ID {id} no fue encontrado.");
+            }
+
+            _repository.Delete(id);
         }
 
-        // Método auxiliar privado para no repetir código de mapeo
         private ProductResponseDto MapToResponseDto(Product product)
         {
             return new ProductResponseDto

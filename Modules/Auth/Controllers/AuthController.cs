@@ -18,22 +18,16 @@ namespace InventoryApi.Modules.Auth.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var result = _authService.Register(dto);
-            if (result == null) return BadRequest(new { Message = "El correo ya está registrado." });
-
+            
             return Ok(result);
         }
 
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var result = _authService.Login(dto);
-            if (result == null) return Unauthorized(new { Message = "Credenciales incorrectas." });
-
+            
             return Ok(result);
         }
     }

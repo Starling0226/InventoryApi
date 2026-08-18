@@ -3,10 +3,11 @@ using InventoryApi.Data;
 using InventoryApi.Modules.Products;
 using InventoryApi.Modules.Categories;
 using InventoryApi.Modules.Auth; 
-using InventoryApi.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer; 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens; 
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,9 +47,18 @@ builder.Services.AddAuthModule();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowVite", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") 
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
-app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -57,6 +67,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<InventoryApi.Exceptions.GlobalExceptionMiddleware>();
+
+app.UseCors("AllowVite");
 
 app.UseAuthentication();
 app.UseAuthorization();

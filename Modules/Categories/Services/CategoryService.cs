@@ -1,6 +1,7 @@
 using InventoryApi.Modules.Categories.Dtos;
 using InventoryApi.Modules.Categories.Entities;
 using InventoryApi.Modules.Categories.Repositories;
+using InventoryApi.Exceptions;
 
 namespace InventoryApi.Modules.Categories.Services
 {
@@ -24,10 +25,14 @@ namespace InventoryApi.Modules.Categories.Services
             });
         }
 
-        public CategoryResponseDto? GetById(int id)
+        public CategoryResponseDto GetById(int id)
         {
             var category = _repository.GetById(id);
-            if (category == null) return null;
+            
+            if (category == null) 
+            {
+                throw new NotFoundException($"La categoría con el ID {id} no fue encontrada.");
+            }
 
             return new CategoryResponseDto
             {
@@ -39,6 +44,11 @@ namespace InventoryApi.Modules.Categories.Services
 
         public CategoryResponseDto Create(CreateCategoryDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                throw new BadRequestException("El nombre de la categoría es obligatorio y no puede estar vacío.");
+            }
+
             var newCategory = new Category
             {
                 Name = dto.Name,

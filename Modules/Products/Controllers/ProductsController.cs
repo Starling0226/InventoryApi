@@ -7,7 +7,7 @@ namespace InventoryApi.Modules.Products.Controllers
 {
     [ApiController]
     [Route("products")]
-    [Authorize]
+    [Authorize] 
     public class ProductsController : ControllerBase
     {
         private readonly ProductService _productService;
@@ -27,15 +27,12 @@ namespace InventoryApi.Modules.Products.Controllers
         public IActionResult GetById(int id)
         {
             var product = _productService.GetById(id);
-            if (product == null) return NotFound(new { Message = "Producto no encontrado." });
             return Ok(product);
         }
 
         [HttpPost]
         public IActionResult Create([FromBody] CreateProductDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var newProduct = _productService.Create(dto);
             return CreatedAtAction(nameof(GetById), new { id = newProduct.Id }, newProduct); 
         }
@@ -43,21 +40,16 @@ namespace InventoryApi.Modules.Products.Controllers
         [HttpPatch("{id:int}")] 
         public IActionResult PartialUpdate(int id, [FromBody] PartialUpdateProductDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var updatedProduct = _productService.PartialUpdate(id, dto);
-            if (updatedProduct == null) return NotFound(new { Message = "Producto no encontrado." });
-
             return Ok(updatedProduct);
         }
 
         [HttpDelete("{id:int}")] 
         public IActionResult Delete(int id)
         {
-            var isDeleted = _productService.Delete(id);
-            if (!isDeleted) return NotFound(new { Message = "Producto no encontrado." });
-
-            return Ok(new { Message = "Producto eliminado exitosamente." });
+            _productService.Delete(id);
+            
+            return NoContent(); 
         }
     }
 }

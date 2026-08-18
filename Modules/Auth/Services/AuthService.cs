@@ -4,6 +4,7 @@ using System.Text;
 using InventoryApi.Data;
 using InventoryApi.Modules.Auth.Dtos;
 using InventoryApi.Modules.Auth.Entities;
+using InventoryApi.Exceptions; 
 using Microsoft.IdentityModel.Tokens;
 
 namespace InventoryApi.Modules.Auth.Services
@@ -19,9 +20,12 @@ namespace InventoryApi.Modules.Auth.Services
             _config = config;
         }
 
-        public AuthResponseDto? Register(RegisterDto dto)
+        public AuthResponseDto Register(RegisterDto dto)
         {
-            if (_context.Users.Any(u => u.Email == dto.Email)) return null;
+            if (_context.Users.Any(u => u.Email == dto.Email)) 
+            {
+                throw new ConflictException("El correo ya está registrado.");
+            }
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
@@ -38,12 +42,14 @@ namespace InventoryApi.Modules.Auth.Services
             return new AuthResponseDto { Message = "Usuario registrado exitosamente." };
         }
 
-        public AuthResponseDto? Login(LoginDto dto)
+        public AuthResponseDto Login(LoginDto dto)
         {
             var user = _context.Users.SingleOrDefault(u => u.Email == dto.Email);
             
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-                return null;
+            {
+                throw new UnauthorizedException("Credenciales incorrectas.");
+            }
 
             string token = GenerateJwtToken(user);
 
